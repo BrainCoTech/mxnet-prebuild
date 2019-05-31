@@ -36,7 +36,7 @@ echo_y "copy header and library"
 cd $root
 cp mxnet/include/mxnet/c_predict_api.h    mac/include
 cp mxnet/amalgamation/libmxnet_predict.a  mac/static
-cp mxnet/lib/libmxnet_predict.so          mac/shared
+cp mxnet/lib/libmxnet_predict.so          mac/shared/libmxnet_predict.dylib
 
 cd mac
 echo_y "\ntest static library"
