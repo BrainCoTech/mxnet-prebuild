@@ -44,3 +44,5 @@ dist/
 
 # IDE
 .vscode/
+
+release/
