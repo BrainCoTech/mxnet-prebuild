@@ -29,12 +29,12 @@ export PATH="$PATH:${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/${PLATFORM}/bin"
 # build openblas
 cd ${root}/../openblas
 
-# 1. armv7a
+# 1. armeabi-v7a
 make clean
 make -j4 ONLY_CBLAS="1" HOSTCC="gcc" ARM_SOFTFP_ABI="1" TARGET="ARMV7" \
     AR="arm-linux-androideabi-ar" \
     CC="armv7a-linux-androideabi${API}-clang"
-make PREFIX="${root}/openblas/armv7a/" install
+make PREFIX="${root}/openblas/armeabi-v7a/" install
 
 # 2. arm64-v8a
 make clean

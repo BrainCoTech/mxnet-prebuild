@@ -26,13 +26,13 @@ fi
 export PATH="$PATH:${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/${PLATFORM}/bin"
 
 ARCHS=(
-    armv7a
+    armeabi-v7a
     arm64-v8a
     x86
     x86_64)
 
 CCS=(
-    armv7a-linux-androideabi${API}-clang   # armv7a
+    armv7a-linux-androideabi${API}-clang   # armeabi-v7a
     aarch64-linux-android${API}-clang      # arm64-v8a
     i686-linux-android${API}-clang         # x86
     x86_64-linux-android${API}-clang)      # x86_64
