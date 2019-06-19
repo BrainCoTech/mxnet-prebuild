@@ -87,34 +87,30 @@ mv tmp.cc mxnet_predict-all.cc
 # copy the source code
 mv mxnet_predict-all.cc $root/ios/src
 
-cd $root/ios/build
+# cmake build
+cd $root/ios
+cmake -S . -B "build" -G "Xcode"                    \
+    -DCMAKE_SYSTEM_NAME="iOS"                       \
+    -DCMAKE_OSX_ARCHITECTURES="arm64;arm64e;x86_64" \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET="10"              \
+    -DCMAKE_INSTALL_PREFIX="$(pwd)/build"           \
+    -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH="NO"   \
+    -DCMAKE_IOS_INSTALL_COMBINED="YES"
 
-ARCH="arm64;arm64e;x86_64" # not support armv7, armv7s, i386
-cmake .. -G Xcode \
-    -DCMAKE_SYSTEM_NAME="iOS"          \
-    -DCMAKE_OSX_ARCHITECTURES="$ARCH"  \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET="10" \
-    -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH="NO"
+cmake --build "build" --config "Release" --target "install" \
+      -- ALWAYS_SEARCH_USER_PATHS="NO"       \
+         BITCODE_GENERATION_MODE="bitcode"   \
+         OTHER_CFLAGS="-fembed-bitcode"
 
 # iphonesimulator: Debug 164MB   / Release 23MB    (x86_64)
 # iphoneos:        Debug 848.5MB / Release 107.2MB (arm64 + arm64e)
 
-PLATFORMS="iphoneos iphonesimulator"
-for SDK in ${PLATFORMS}
+# arm64  (Release: 51.2MB)
+# arm64e (Release: 56.1MB)
+# x86_64 (Release: 23.3MB)
+ARCHS="arm64 arm64e x86_64"
+for ARCH in ${ARCHS}
 do
-    cmake --build . --config "Release"        \
-          -- -sdk "${SDK}"                    \
-            ALWAYS_SEARCH_USER_PATHS="NO"     \
-            BITCODE_GENERATION_MODE="bitcode" \
-            OTHER_CFLAGS="-fembed-bitcode"
-
-    mv "Release-$SDK" "$root/ios/dist/$SDK"
+    lipo -thin ${ARCH} build/lib/libmxnet_predict.a \
+         -output dist/libmxnet_predict-ios-${ARCH}.a
 done
-
-# merge universal library
-cd ..
-echo_y "[lipo] merge universal libmxnet_predict.a"
-mkdir -p dist/universal
-lipo -create dist/iphoneos/libmxnet_predict.a        \
-             dist/iphonesimulator/libmxnet_predict.a \
-     -output dist/universal/libmxnet_predict.a

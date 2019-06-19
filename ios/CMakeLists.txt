@@ -22,3 +22,5 @@ target_include_directories(
     ${targer_name}              # include directories to target
     PUBLIC include              # public header
 )
+
+install(TARGETS ${targer_name} DESTINATION lib)
