@@ -19,10 +19,11 @@ const char* attention_input_key[1] = { "data" };
 const char** attention_input_keys = attention_input_key;
 
 const mx_uint attention_input_shape_indptr[2] = { 0, 2 }; // column dim is 3
-const mx_uint attention_input_shape_data[2] = {1,784}; // 3 x 2 matrix input data shape
+const mx_uint attention_input_shape_data[2] = {1, ATTENTION_INPUT_LENGTH}; 
+
+static PredictorHandle handle;
 
 int attention_model_create() {
-    PredictorHandle handle;
     return MXPredCreate(ATTENTION_SYMBOL,
                ATTENTION_PARAMS,
                (int) sizeof(ATTENTION_PARAMS),
@@ -32,7 +33,7 @@ int attention_model_create() {
                attention_input_keys,
                attention_input_shape_indptr,
                attention_input_shape_data,
-               handle);
+               &handle);
 }
 
 int main() {
@@ -40,5 +41,6 @@ int main() {
 
     printf("[TEST] Construct pseudo model: %d\n", res);
     printf("%s\n", MXGetLastError());
+
     return 0;
 }
