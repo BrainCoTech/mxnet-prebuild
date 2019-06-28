@@ -10,19 +10,19 @@
 #define MXNET_NUM_INPUT_NODES 1 // Number of input nodes to the net, for feedforward net, this is 1.
 
 
-#define ATTENTION_INPUT_LENGTH 784 
-#define ATTENTION_OUTPUT_LENGTH 10
+#define ATTENTION_INPUT_LENGTH 1250 
+#define ATTENTION_OUTPUT_LENGTH 3
 
 
 const char* attention_input_key[1] = { "data" };
 const char** attention_input_keys = attention_input_key;
 
-const mx_uint attention_input_shape_indptr[2] = { 0, 2 }; // column dim is 3
-const mx_uint attention_input_shape_data[2] = {1, ATTENTION_INPUT_LENGTH}; 
+const mx_uint attention_input_shape_indptr[2] = { 0, 3 }; // column dim is 3
+const mx_uint attention_input_shape_data[3] = {1, 1, ATTENTION_INPUT_LENGTH}; 
 
 static PredictorHandle predictor;
 
-const mx_float test_data[784] = {0};
+const mx_float test_data[1250] = {0};
 
 int attention_model_create() {
     return MXPredCreate(ATTENTION_SYMBOL,
@@ -64,6 +64,9 @@ int main() {
     res = MXPredGetOutput(predictor, output_index, output, (mx_uint) size);
 
     printf("[TEST] Retrieve output success: %d\n", res);
+    printf("[TEST] Retrieved output value[0]: %f\n", output[0]);
+    printf("[TEST] Retrieved output value[1]: %f\n", output[1]);
+    printf("[TEST] Retrieved output value[2]: %f\n", output[1]);
 
     printf("[TEST] Last error:%s\n", MXGetLastError());
     free(output);
