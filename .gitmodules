@@ -1,6 +1,6 @@
-[submodule "mxnet"]
-	path = mxnet
-	url = https://github.com/apache/incubator-mxnet.git
 [submodule "openblas"]
 	path = openblas
 	url = https://github.com/xianyi/OpenBLAS.git
+[submodule "mxnet"]
+	path = mxnet
+	url = https://github.com/adis300/incubator-mxnet.git
