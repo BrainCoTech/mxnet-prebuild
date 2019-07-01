@@ -2,11 +2,12 @@
 set -e
 root=$(pwd)
 
-rm -rf dist
-mkdir -p dist
-
 # Android SDK API Level (API 21 for Android 5.0)
 API="21"
+
+# clean
+rm -rf dist
+mkdir -p dist
 
 # check NDK
 if [ -z "$ANDROID_NDK_ROOT" ]; then
@@ -14,41 +15,27 @@ if [ -z "$ANDROID_NDK_ROOT" ]; then
     exit 1
 fi
 
-# check toolchain platform
+# check toolchain platform and export to PATH
 cd ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt
 PLATFORM=$(ls -1 | head -1)     # e.g. darwin-x86_64
 if [ -z "$PLATFORM" ]; then
     echo "[android] get toolchain platform failed"
     exit 1
 fi
-
-# export toolchain to PATH (for CC and CXX)
 export PATH="$PATH:${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/${PLATFORM}/bin"
 
-ARCHS=(
-    armeabi-v7a
-    arm64-v8a
-    x86
-    x86_64)
-
-CCS=(
-    armv7a-linux-androideabi${API}-clang   # armeabi-v7a
-    aarch64-linux-android${API}-clang      # arm64-v8a
-    i686-linux-android${API}-clang         # x86
-    x86_64-linux-android${API}-clang)      # x86_64
-
-for i in {0..3}
-do
-    ARCH=${ARCHS[$i]}
-    export CC=${CCS[$i]}
-    export CXX=${CC}++
+# build function
+function build () {
+    echo "ARCH = ${ARCH}"
+    echo "AR   = ${AR}"
+    echo "CC   = ${CC}"
+    echo "CXX  = ${CXX}"
 
     # build mxnet object file
-    cd ${root}/../mxnet/amalgamation
-    OPENBLAS_ROOT="${root}/openblas/${ARCH}"
-
+    OPTIONS="ANDROID=1 OPENBLAS_ROOT=${root}/openblas/${ARCH}"
+    cd ${root}/../mxnet/amalgamation/
     make clean
-    make mxnet_predict-all.cc ANDROID=1 OPENBLAS_ROOT=${OPENBLAS_ROOT}
+    make mxnet_predict-all.cc ${OPTIONS}
 
     # modify mxnet_predict-all.cc
     cat mxnet_predict-all.cc \
@@ -57,16 +44,45 @@ do
         > tmp.cc
     mv tmp.cc mxnet_predict-all.cc
 
-    # build object file
-    make mxnet_predict-all.o ANDROID=1 OPENBLAS_ROOT=${OPENBLAS_ROOT}
+    # build mxnet_predict-all.o
+    make mxnet_predict-all.o ${OPTIONS}
 
-    # move 'mxnet_predict-all.o' to dist
+    # move mxnet_predict-all.o to dist
     mv mxnet_predict-all.o ${root}/dist
 
+    # merge openblas into libmxnet_predict.a
     cd ${root}/dist
-    ar x ${root}/openblas/${ARCH}/lib/*.dev.a       # generate openblas object files
-    ar rcs libmxnet_predict-android-${ARCH}.a *.o   # combine all object files to a static library
+    ${AR} x ${root}/openblas/${ARCH}/lib/*.dev.a      # generate openblas object files
+    ${AR} rcs libmxnet_predict-android-${ARCH}.a *.o  # combine all object files to a static library
 
     # remove object files
     rm -rf *.o
-done
+}
+
+# 1. armeabi-v7a
+export ARCH="armeabi-v7a"
+export AR="arm-linux-androideabi-ar"
+export CC="armv7a-linux-androideabi${API}-clang"
+export CXX="armv7a-linux-androideabi${API}-clang++"
+build
+
+# 2. arm64-v8a
+export ARCH="arm64-v8a"
+export AR="aarch64-linux-android-ar"
+export CC="aarch64-linux-android${API}-clang"
+export CXX="aarch64-linux-android${API}-clang++"
+build
+
+# 3. x86
+export ARCH="x86"
+export AR="i686-linux-android-ar"
+export CC="i686-linux-android${API}-clang"
+export CXX="i686-linux-android${API}-clang++"
+build
+
+# 4. x86_64
+export ARCH="x86_64"
+export AR="x86_64-linux-android-ar"
+export CC="x86_64-linux-android${API}-clang"
+export CXX="x86_64-linux-android${API}-clang++"
+build
