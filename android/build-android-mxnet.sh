@@ -24,6 +24,15 @@ if [ -z "$PLATFORM" ]; then
 fi
 export PATH="$PATH:${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/${PLATFORM}/bin"
 
+# Makefile: remove hard-float flag
+cd ${root}/../mxnet/amalgamation/
+git checkout -- .
+cat Makefile \
+    | sed 's/-mhard-float -D_NDK_MATH_NO_SOFTFP=1//' \
+    | sed 's/ -lm_hard//' \
+    > tmp.mk
+mv tmp.mk Makefile
+
 # build function
 function build () {
     echo "ARCH = ${ARCH}"
@@ -86,3 +95,7 @@ export AR="x86_64-linux-android-ar"
 export CC="x86_64-linux-android${API}-clang"
 export CXX="x86_64-linux-android${API}-clang++"
 build
+
+# Makefile: reset changed files in MXNet
+cd ${root}/../mxnet/amalgamation/
+git checkout -- .
