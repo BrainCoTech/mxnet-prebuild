@@ -20,9 +20,10 @@ function echo_r () {
     echo -e "${RED}$@${RESET}"
 }
 
-# clean
-rm -rf dist
-mkdir -p dist
+# clean dist
+dist=${root}/dist/static
+rm -rf ${dist}
+mkdir -p ${dist}
 
 # ENV: check Python 2.x
 PY_VERSION=$(python -V 2>&1)
@@ -121,6 +122,7 @@ function build () {
         0 1                         # MIN=0 ANDROID=1
 
     # modify mxnet_predict-all.cc
+    # Reference: https://github.com/sunkwei/SSD_Demo_Android
     echo_y "[${ARCH}] modify mxnet_predict-all.cc"
     cat mxnet_predict-all.cc \
         | sed 's/#include <TargetConditionals.h>//' \
@@ -132,11 +134,11 @@ function build () {
     echo_y "[${ARCH}] build mxnet_predict-all.o"
     ${CXX} ${CFLAGS} -fPIC \
         -c mxnet_predict-all.cc \
-        -o ${root}/dist/mxnet_predict-all.o           # destination: ${root}/dist
+        -o ${dist}/mxnet_predict-all.o   # destination: dist/static/
 
     # merge openblas.a into libmxnet_predict.a
     echo_y "[${ARCH}] merge openblas.a into libmxnet_predict.a"
-    cd ${root}/dist
+    cd ${dist}
     ${AR} x ${root}/openblas/${ARCH}/lib/*.dev.a      # generate openblas object files
     ${AR} rcs libmxnet_predict-android-${ARCH}.a *.o  # combine all object files to a static library
 
