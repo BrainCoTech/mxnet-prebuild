@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "c_predict_api.h"
-#include "test_model.h"
+#include "model.h"
 
 #define MXNET_DEV_TYPE 1 // 1:CPU, 2: GPU. In most platforms, GPU driver support will be limited
 #define MXNET_DEV_ID 0   // Arbitrary.
@@ -10,7 +10,7 @@
 #define MXNET_NUM_INPUT_NODES 1 // Number of input nodes to the net, for feedforward net, this is 1.
 
 
-#define ATTENTION_INPUT_LENGTH 1250 
+#define ATTENTION_INPUT_LENGTH 1250
 #define ATTENTION_OUTPUT_LENGTH 3
 
 
@@ -18,7 +18,7 @@ const char* attention_input_key[1] = { "data" };
 const char** attention_input_keys = attention_input_key;
 
 const mx_uint attention_input_shape_indptr[2] = { 0, 3 }; // column dim is 3
-const mx_uint attention_input_shape_data[3] = {1, 1, ATTENTION_INPUT_LENGTH}; 
+const mx_uint attention_input_shape_data[3] = {1, 1, ATTENTION_INPUT_LENGTH};
 
 static PredictorHandle predictor;
 

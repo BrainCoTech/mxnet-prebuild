@@ -37,12 +37,3 @@ cd $root
 cp mxnet/include/mxnet/c_predict_api.h    mac/include
 cp mxnet/amalgamation/libmxnet_predict.a  mac/static
 cp mxnet/lib/libmxnet_predict.so          mac/shared/libmxnet_predict.dylib
-
-cd mac
-echo_y "\ntest static library"
-gcc -o static-test.exe test.c -I./include static/libmxnet_predict.a -lblas -lstdc++
-./static-test.exe --verbose
-
-echo_y "\ntest shared library"
-gcc -o shared-test.exe test.c -I./include -L./shared -lmxnet_predict -lblas -lstdc++
-./shared-test.exe
