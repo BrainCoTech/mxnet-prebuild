@@ -21,7 +21,7 @@ function echo_r () {
 }
 
 # clean dist
-dist=${root}/dist/jni
+dist=${root}/dist
 rm -rf ${dist}
 mkdir -p ${dist}
 
@@ -77,10 +77,11 @@ function build () {
     mv tmp.cc mxnet_predict-all.cc
 
     # build mxnet_predict-all.o
-    make jni_libmxnet_predict.so ${OPTIONS}
+    make ${OPTIONS}
 
     # move jni_libmxnet_predict.so to dist
-    mv jni_libmxnet_predict.so ${dist}/libmxnet_predict-jni-${ARCH}.so
+    mv ../lib/libmxnet_predict.so ${dist}/libmxnet_predict-android-${ARCH}.so
+    mv libmxnet_predict.a ${dist}/libmxnet_predict-android-${ARCH}.a
 }
 
 # 1. armeabi-v7a
