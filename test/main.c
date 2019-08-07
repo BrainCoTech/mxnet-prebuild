@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "bool.h"
 #include "c_predict_api.h"
 #include "model.h"
 
