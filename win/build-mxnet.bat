@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 set ARCH=x64
 cd %~dp0
 set SCRIPT_DIR=%CD%
@@ -28,9 +28,21 @@ goto :eof
 
     :: Update FindOpenBLAS.cmake
     call :echo_y Update cmake\Modules\FindOpenBLAS.cmake
-    pushd %MXNET_ROOT%
-        :: TODO: don't overwrite the file directly
-        call xcopy /y %SCRIPT_DIR%\FindOpenBLAS.cmake cmake\Modules\FindOpenBLAS.cmake
+    pushd %MXNET_ROOT%\cmake\Modules
+        :: add "${OpenBLAS_HOME}/include/openblas" after "${OpenBLAS_HOME}/include"
+        :: https://stackoverflow.com/a/4531177
+        for /f "delims=" %%a in ('findstr /n "^" FindOpenBLAS.cmake') do (
+            set "line=%%a"
+            set "line=!line:*:=!"
+            echo.!line!
+
+            if "!line!" equ "  ${OpenBLAS_HOME}/include" (
+                echo   ${OpenBLAS_HOME}/include/openblas
+            )
+        ) >> tmp.cmake
+        move /y tmp.cmake FindOpenBLAS.cmake
+
+        :: show diff
         call git diff
     popd
 
