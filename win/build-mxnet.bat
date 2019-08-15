@@ -8,17 +8,18 @@ goto :main
 
 :: echo yellow
 :echo_y
+    echo.
     echo [93m%*[0m
 goto :eof
 
 :: clean
 :clean
     pushd %MXNET_ROOT%
-        :: clean mxnet
+        call :echo_y [win][mxnet] reset mxnet
         call git reset --hard HEAD
 
-        :: clean dmlc
         cd 3rdparty\dmlc-core
+        call :echo_y [win][dmlc] reset mxnet\3rdparty\dmlc-core
         call git reset --hard HEAD
     popd
 goto :eof
@@ -27,7 +28,7 @@ goto :eof
     call :clean
 
     :: Update FindOpenBLAS.cmake
-    call :echo_y Update cmake\Modules\FindOpenBLAS.cmake
+    call :echo_y [win][mxnet] Update cmake\Modules\FindOpenBLAS.cmake
     pushd %MXNET_ROOT%\cmake\Modules
         :: add "${OpenBLAS_HOME}/include/openblas" after "${OpenBLAS_HOME}/include"
         :: https://stackoverflow.com/a/4531177
@@ -51,7 +52,7 @@ goto :eof
     call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH%
 
     :: create mxnet build folder
-    rmdir /s /q build\mxnet mxnet
+    rmdir /s /q build\mxnet dist
     mkdir       build\mxnet
 
     :: build mxnet
@@ -59,7 +60,7 @@ goto :eof
         set OpenBLAS_HOME=%SCRIPT_DIR%\openblas
 
         :: cmake build
-        call cmake %MXNET_ROOT% -Ax64       ^
+        call cmake %MXNET_ROOT% -A%ARCH%    ^
                 -DUSE_CUDA=0                ^
                 -DUSE_CUDNN=0               ^
                 -DUSE_OPENCV=0              ^
@@ -69,11 +70,22 @@ goto :eof
                 -DUSE_LAPACK=0              ^
                 -DUSE_DIST_KVSTORE=0        ^
                 -DBUILD_CPP_EXAMPLES=0      ^
-                -DUSE_MKL_IF_AVAILABLE=0    ^
-                -DCMAKE_INSTALL_PREFIX=%SCRIPT_DIR%\mxnet
+                -DUSE_MKL_IF_AVAILABLE=0
 
-        call cmake --build . --config Release --target install
+        call cmake --build . --config Release
     popd
+
+    :: create dist folder
+    mkdir dist\%ARCH%\shared
+
+    :: merge dmlc and openblas into libmxnet
+    call lib /nologo /out:dist\%ARCH%\shared\libmxnet.lib   ^
+            build\mxnet\Release\libmxnet.lib                ^
+            build\mxnet\3rdparty\dmlc-core\Release\dmlc.lib ^
+            openblas\lib\openblas.lib
+
+    :: copy dll
+    xcopy build\mxnet\Release\libmxnet.dll dist\%ARCH%\shared\
 
     call :clean
 goto :eof
