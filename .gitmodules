@@ -3,4 +3,4 @@
 	url = https://github.com/xianyi/OpenBLAS.git
 [submodule "mxnet"]
 	path = mxnet
-	url = https://github.com/adis300/incubator-mxnet.git
+	url=https://github.com/apache/incubator-mxnet.git
